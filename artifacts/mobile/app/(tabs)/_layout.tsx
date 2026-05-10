@@ -17,6 +17,15 @@ function NativeTabLayout() {
         <Icon sf={{ default: "bolt", selected: "bolt.fill" }} />
         <Label>Dashboard</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="training">
+        <Icon
+          sf={{
+            default: "chart.line.uptrend.xyaxis",
+            selected: "chart.line.uptrend.xyaxis",
+          }}
+        />
+        <Label>Training</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="goals">
         <Icon sf={{ default: "target", selected: "target" }} />
         <Label>Goals</Label>
@@ -79,7 +88,7 @@ function ClassicTabLayout() {
         tabBarLabelStyle: {
           fontFamily: "Inter_500Medium",
           fontSize: 10,
-          letterSpacing: 0.5,
+          letterSpacing: 0.3,
         },
       }}
     >
@@ -92,6 +101,22 @@ function ClassicTabLayout() {
               <SymbolView name="bolt.fill" tintColor={color} size={22} />
             ) : (
               <Feather name="activity" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="training"
+        options={{
+          title: "Training",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView
+                name="chart.line.uptrend.xyaxis"
+                tintColor={color}
+                size={20}
+              />
+            ) : (
+              <Feather name="trending-up" size={22} color={color} />
             ),
         }}
       />

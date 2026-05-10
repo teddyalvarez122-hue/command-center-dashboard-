@@ -1,5 +1,6 @@
 import * as AuthSession from "expo-auth-session";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useColors } from "@/hooks/useColors";
 import { useStrava, StravaActivity } from "@/context/StravaContext";
+import { useApp } from "@/context/AppContext";
 
 const MONO = Platform.select({
   ios: "Courier New",
@@ -92,6 +94,113 @@ function activityIcon(sportType: string) {
   if (type.includes("swim")) return "~";
   if (type.includes("walk") || type.includes("hike")) return "↑";
   return "◆";
+}
+
+function getErgWeeklyStats(ergSessions: ReturnType<typeof useApp>["ergSessions"]) {
+  const now = new Date();
+  const day = now.getDay();
+  const daysFromMon = day === 0 ? 6 : day - 1;
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - daysFromMon);
+  startOfWeek.setHours(0, 0, 0, 0);
+  const weekSessions = ergSessions.filter(
+    (s) => new Date(s.date + "T00:00:00") >= startOfWeek
+  );
+  const totalMeters = weekSessions.reduce((sum, s) => sum + s.distance, 0);
+  const bestTime = ergSessions.length
+    ? Math.min(...ergSessions.map((s) => s.time))
+    : null;
+  return { count: weekSessions.length, meters: totalMeters, bestTime };
+}
+
+function formatErgTimeDash(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function ErgWeeklyWidget() {
+  const colors = useColors();
+  const { ergSessions } = useApp();
+  const stats = getErgWeeklyStats(ergSessions);
+  const secondsLeft = stats.bestTime ? stats.bestTime - 410 : null;
+
+  return (
+    <Pressable
+      onPress={() => router.push("/training")}
+      style={({ pressed }) => [
+        styles.ergWidget,
+        {
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+          opacity: pressed ? 0.85 : 1,
+        },
+      ]}
+    >
+      <View style={styles.ergWidgetLeft}>
+        <Text style={[styles.ergWidgetLabel, { color: colors.mutedForeground }]}>
+          ERG THIS WEEK
+        </Text>
+        <View style={styles.ergWidgetMetrics}>
+          <View style={styles.ergMetric}>
+            <Text style={[styles.ergMetricVal, { color: colors.primary, fontFamily: MONO }]}>
+              {stats.count}
+            </Text>
+            <Text style={[styles.ergMetricUnit, { color: colors.mutedForeground }]}>
+              sessions
+            </Text>
+          </View>
+          <View style={[styles.ergDivider, { backgroundColor: colors.border }]} />
+          <View style={styles.ergMetric}>
+            <Text style={[styles.ergMetricVal, { color: colors.foreground, fontFamily: MONO }]}>
+              {stats.meters >= 1000
+                ? `${(stats.meters / 1000).toFixed(1)}k`
+                : stats.meters.toString()}
+            </Text>
+            <Text style={[styles.ergMetricUnit, { color: colors.mutedForeground }]}>
+              meters
+            </Text>
+          </View>
+          {stats.bestTime != null && (
+            <>
+              <View style={[styles.ergDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.ergMetric}>
+                <Text style={[styles.ergMetricVal, { color: colors.accent, fontFamily: MONO }]}>
+                  {formatErgTimeDash(stats.bestTime)}
+                </Text>
+                <Text style={[styles.ergMetricUnit, { color: colors.mutedForeground }]}>
+                  PB 2K
+                </Text>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+      <View style={styles.ergWidgetRight}>
+        {secondsLeft != null && secondsLeft > 0 && (
+          <View style={[styles.ergGapPill, { backgroundColor: colors.primary + "22" }]}>
+            <Text style={[styles.ergGapText, { color: colors.primary, fontFamily: MONO }]}>
+              -{secondsLeft}s
+            </Text>
+            <Text style={[styles.ergGapSub, { color: colors.mutedForeground }]}>
+              to go
+            </Text>
+          </View>
+        )}
+        {secondsLeft != null && secondsLeft <= 0 && (
+          <View style={[styles.ergGapPill, { backgroundColor: colors.accent + "22" }]}>
+            <Text style={[styles.ergGapText, { color: colors.accent }]}>
+              TARGET
+            </Text>
+            <Text style={[styles.ergGapSub, { color: colors.accent }]}>
+              HIT!
+            </Text>
+          </View>
+        )}
+        <Text style={[styles.ergChevron, { color: colors.mutedForeground }]}>›</Text>
+      </View>
+    </Pressable>
+  );
 }
 
 function getWeeklyStats(activities: StravaActivity[]) {
@@ -272,11 +381,7 @@ function ConnectScreen({ onConnect }: { onConnect: () => void }) {
   }
 
   return (
-    <ScrollView
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={styles.connectContainer}
-      keyboardShouldPersistTaps="handled"
-    >
+    <View style={styles.connectContainer}>
       <View
         style={[
           styles.connectCard,
@@ -424,7 +529,7 @@ function ConnectScreen({ onConnect }: { onConnect: () => void }) {
           )}
         </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -490,9 +595,12 @@ function ConnectedDashboard() {
         </Pressable>
       </View>
 
+      {/* Erg Widget */}
+      <ErgWeeklyWidget />
+
       {/* This Week Label */}
-      <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
-        THIS WEEK
+      <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 8 }]}>
+        THIS WEEK — STRAVA
       </Text>
 
       {/* Weekly Stats */}
@@ -620,7 +728,14 @@ export default function DashboardScreen() {
           </Text>
           <SydneyClockInline />
         </View>
-        <ConnectScreen onConnect={() => setConnected(true)} />
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: bottomPad }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <ErgWeeklyWidget />
+          <ConnectScreen onConnect={() => setConnected(true)} />
+        </ScrollView>
       </View>
     );
   }
@@ -892,5 +1007,72 @@ const styles = StyleSheet.create({
   emptySubText: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
+  },
+  ergWidget: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 14,
+  },
+  ergWidgetLeft: {
+    flex: 1,
+    gap: 8,
+  },
+  ergWidgetLabel: {
+    fontSize: 9,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 2,
+  },
+  ergWidgetMetrics: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  ergMetric: {
+    alignItems: "flex-start",
+    gap: 1,
+  },
+  ergMetricVal: {
+    fontSize: 20,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+  },
+  ergMetricUnit: {
+    fontSize: 9,
+    fontFamily: "Inter_400Regular",
+  },
+  ergDivider: {
+    width: 1,
+    height: 28,
+    borderRadius: 1,
+  },
+  ergWidgetRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  ergGapPill: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignItems: "center",
+    gap: 1,
+  },
+  ergGapText: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+  },
+  ergGapSub: {
+    fontSize: 8,
+    fontFamily: "Inter_500Medium",
+    letterSpacing: 0.5,
+  },
+  ergChevron: {
+    fontSize: 22,
+    fontWeight: "300",
   },
 });

@@ -315,7 +315,7 @@ function ConnectScreen({ onConnect }: { onConnect: () => void }) {
 
   const redirectUri = AuthSession.makeRedirectUri({ scheme: "mobile" });
 
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+  const [request, , promptAsync] = AuthSession.useAuthRequest(
     {
       clientId: clientId || "__placeholder__",
       scopes: ["activity:read_all"],
@@ -326,50 +326,6 @@ function ConnectScreen({ onConnect }: { onConnect: () => void }) {
     { authorizationEndpoint: "https://www.strava.com/oauth/authorize" }
   );
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { code } = response.params;
-      handleCodeExchange(code);
-    } else if (response?.type === "error") {
-      setConnecting(false);
-      Alert.alert("Connection failed", response.error?.message ?? "OAuth error");
-    } else if (response?.type === "cancel" || response?.type === "dismiss") {
-      setConnecting(false);
-    }
-  }, [response]);
-
-  async function handleCodeExchange(code: string) {
-    try {
-      const resp = await fetch("https://www.strava.com/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client_id: clientId,
-          client_secret: clientSecret,
-          code,
-          grant_type: "authorization_code",
-        }),
-      });
-      if (!resp.ok) throw new Error("Token exchange failed");
-      const data = await resp.json();
-      await saveTokens(
-        {
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-          expiresAt: data.expires_at,
-        },
-        data.athlete,
-        clientId,
-        clientSecret
-      );
-      onConnect();
-    } catch (e: unknown) {
-      Alert.alert("Error", e instanceof Error ? e.message : "Connection failed");
-    } finally {
-      setConnecting(false);
-    }
-  }
-
   async function handleConnect() {
     if (!clientId.trim() || !clientSecret.trim()) {
       Alert.alert("Required", "Enter your Strava Client ID and Secret");
@@ -377,7 +333,49 @@ function ConnectScreen({ onConnect }: { onConnect: () => void }) {
     }
     setConnecting(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await promptAsync();
+    try {
+      const result = await promptAsync();
+      if (!result || result.type === "cancel" || result.type === "dismiss") {
+        return;
+      }
+      if (result.type === "error") {
+        Alert.alert("Connection failed", result.error?.message ?? "OAuth error");
+        return;
+      }
+      if (result.type === "success") {
+        const { code } = result.params;
+        const resp = await fetch("https://www.strava.com/oauth/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            client_id: clientId,
+            client_secret: clientSecret,
+            code,
+            grant_type: "authorization_code",
+          }),
+        });
+        if (!resp.ok) {
+          const body = await resp.text().catch(() => "");
+          throw new Error(`Token exchange failed (${resp.status})${body ? ": " + body : ""}`);
+        }
+        const data = await resp.json();
+        await saveTokens(
+          {
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            expiresAt: data.expires_at,
+          },
+          data.athlete,
+          clientId,
+          clientSecret
+        );
+        onConnect();
+      }
+    } catch (e: unknown) {
+      Alert.alert("Connection Error", e instanceof Error ? e.message : "Something went wrong. Check your Client ID and Secret.");
+    } finally {
+      setConnecting(false);
+    }
   }
 
   return (

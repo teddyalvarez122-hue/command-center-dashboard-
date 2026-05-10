@@ -1,7 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AuthSession from "expo-auth-session";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -26,6 +24,42 @@ const MONO = Platform.select({
   android: "monospace",
   default: "monospace",
 });
+
+function useSydneyTime() {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    function tick() {
+      setTime(
+        new Date().toLocaleTimeString("en-AU", {
+          timeZone: "Australia/Sydney",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })
+      );
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+}
+
+function SydneyClockInline() {
+  const colors = useColors();
+  const time = useSydneyTime();
+  return (
+    <View style={{ gap: 1 }}>
+      <Text style={{ color: colors.primary, fontFamily: MONO, fontSize: 28, fontWeight: "700", letterSpacing: -1 }}>
+        {time}
+      </Text>
+      <Text style={{ color: colors.mutedForeground, fontFamily: "Inter_400Regular", fontSize: 10, letterSpacing: 1 }}>
+        Sydney, Australia
+      </Text>
+    </View>
+  );
+}
 
 function formatDistance(meters: number) {
   return (meters / 1000).toFixed(2);
@@ -397,6 +431,7 @@ function ConnectScreen({ onConnect }: { onConnect: () => void }) {
 function ConnectedDashboard() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const sydneyTime = useSydneyTime();
   const { athlete, activities, isLoading, refreshActivities, disconnect, error } =
     useStrava();
   const weekly = getWeeklyStats(activities);
@@ -425,15 +460,16 @@ function ConnectedDashboard() {
     >
       {/* Header */}
       <View style={styles.dashHeader}>
-        <View>
+        <View style={{ gap: 2 }}>
           <Text style={[styles.dashGreeting, { color: colors.mutedForeground }]}>
-            COMMAND CENTER
+            COMMAND CENTER — TEDDY
           </Text>
-          {athlete && (
-            <Text style={[styles.dashName, { color: colors.foreground }]}>
-              {athlete.firstname} {athlete.lastname}
-            </Text>
-          )}
+          <Text style={[styles.dashClock, { color: colors.primary, fontFamily: MONO }]}>
+            {sydneyTime}
+          </Text>
+          <Text style={[styles.dashLocation, { color: colors.mutedForeground }]}>
+            Sydney, Australia
+          </Text>
         </View>
         <Pressable
           onPress={() => {
@@ -576,11 +612,13 @@ export default function DashboardScreen() {
           style={{
             paddingTop: topPad + 16,
             paddingHorizontal: 16,
+            gap: 2,
           }}
         >
           <Text style={[styles.dashGreeting, { color: colors.mutedForeground }]}>
-            COMMAND CENTER
+            COMMAND CENTER — TEDDY
           </Text>
+          <SydneyClockInline />
         </View>
         <ConnectScreen onConnect={() => setConnected(true)} />
       </View>
@@ -709,13 +747,24 @@ const styles = StyleSheet.create({
   dashHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
+    alignItems: "flex-start",
     marginBottom: 20,
   },
   dashGreeting: {
     fontSize: 10,
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 2,
+  },
+  dashClock: {
+    fontSize: 28,
+    fontWeight: "700",
+    letterSpacing: -1,
+    marginTop: 2,
+  },
+  dashLocation: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+    letterSpacing: 1,
   },
   dashName: {
     fontSize: 24,

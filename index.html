@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState } = React;
+
+      function App() {
+        const [count, setCount] = useState(0);
+
+        return (
+          <div className="flex flex-col items-center justify-center min-h-screen gap-6">
+            <h1 className="text-4xl font-bold text-gray-900">Hello World</h1>
+            <p className="text-gray-500 text-lg">A standalone React + Tailwind app</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setCount(c => c - 1)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium transition-colors"
+              >
+                -
+              </button>
+              <span className="text-2xl font-semibold text-gray-800 w-12 text-center">{count}</span>
+              <button
+                onClick={() => setCount(c => c + 1)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+  </body>
+</html>

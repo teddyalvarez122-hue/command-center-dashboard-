@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /tmp/cc-agent/67056827/project && /usr/local/lib/node_modules/corepack/shims/pnpm --filter @workspace/mobile run web-dev &",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}

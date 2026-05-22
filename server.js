@@ -13,7 +13,7 @@ const server = http.createServer((req, res) => {
         res.end('Error loading index.html');
         return;
       }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-store' });
       res.end(data);
     });
   } else {

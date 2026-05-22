@@ -18,7 +18,7 @@ const PROGRAM_START = new Date("2026-03-15");
 const PROGRAM_WEEKS = 12;
 
 const FEEL_COLORS: Record<number, string> = {
-  1: "#FF453A", 2: "#FF9F0A", 3: "#FFD60A", 4: "#30D158", 5: "#00D26A",
+  1: "#FF2D55", 2: "#FF9F0A", 3: "#FFD60A", 4: "#39FF14", 5: "#00F0FF",
 };
 const FEEL_LABELS: Record<number, string> = {
   1: "Rough", 2: "Hard", 3: "Solid", 4: "Strong", 5: "Peak",
@@ -132,8 +132,8 @@ function StravaRowCard({ activity }: { activity: StravaActivity }) {
                   <Text style={[styles.typeBadgeText, { color: colors.primary }]}>2K</Text>
                 </View>
               )}
-              <View style={[styles.typeBadge, { backgroundColor: "#FF4500" + "22" }]}>
-                <Text style={[styles.typeBadgeText, { color: "#FF4500" }]}>STRAVA</Text>
+              <View style={[styles.typeBadge, { backgroundColor: "#FF2D55" + "22" }]}>
+                <Text style={[styles.typeBadgeText, { color: "#FF2D55" }]}>STRAVA</Text>
               </View>
             </View>
           </View>
@@ -149,7 +149,7 @@ function StravaRowCard({ activity }: { activity: StravaActivity }) {
           </View>
           {erg.heartrate ? (
             <View style={styles.strataStat}>
-              <Text style={[styles.stravaStatVal, { color: "#FF453A", fontFamily: MONO }]}>{Math.round(erg.heartrate)} bpm</Text>
+              <Text style={[styles.stravaStatVal, { color: "#FF2D55", fontFamily: MONO }]}>{Math.round(erg.heartrate)} bpm</Text>
               <Text style={[styles.stravaStatLabel, { color: colors.mutedForeground }]}>AVG HR</Text>
             </View>
           ) : null}
@@ -170,7 +170,7 @@ function StravaActivityCard({ activity }: { activity: StravaActivity }) {
 
   return (
     <View style={[styles.sessionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <View style={[styles.sessionAccent, { backgroundColor: isRide ? "#FFD60A" : "#30D158" }]} />
+      <View style={[styles.sessionAccent, { backgroundColor: isRide ? "#FFD60A" : "#FF2D55" }]} />
       <View style={styles.sessionBody}>
         <View style={styles.sessionTop}>
           <View style={styles.sessionMeta}>
@@ -178,7 +178,7 @@ function StravaActivityCard({ activity }: { activity: StravaActivity }) {
             <Text style={[styles.sessionNotes, { color: colors.foreground }]} numberOfLines={1}>{activity.name}</Text>
           </View>
           <View style={styles.sessionTimeBlock}>
-            <Text style={[styles.sessionTime, { color: isRide ? "#FFD60A" : "#30D158", fontFamily: MONO, fontSize: 20 }]}>
+            <Text style={[styles.sessionTime, { color: isRide ? "#FFD60A" : "#FF2D55", fontFamily: MONO, fontSize: 20 }]}>
               {formatDistance(activity.distance)}
             </Text>
             <Text style={[styles.sessionSpm, { color: colors.mutedForeground }]}>{formatDuration(activity.moving_time)}</Text>
@@ -193,7 +193,7 @@ function StravaActivityCard({ activity }: { activity: StravaActivity }) {
           </View>
           {activity.average_heartrate ? (
             <View style={styles.strataStat}>
-              <Text style={[styles.stravaStatVal, { color: "#FF453A", fontFamily: MONO }]}>
+              <Text style={[styles.stravaStatVal, { color: "#FF2D55", fontFamily: MONO }]}>
                 {Math.round(activity.average_heartrate)} bpm
               </Text>
               <Text style={[styles.stravaStatLabel, { color: colors.mutedForeground }]}>AVG HR</Text>
@@ -433,7 +433,7 @@ function AddSessionModal({ visible, onClose }: { visible: boolean; onClose: () =
               {TYPES.map((t) => (
                 <Pressable key={t.key} onPress={() => setType(t.key)}
                   style={[styles.typePill, { backgroundColor: type === t.key ? colors.primary : colors.primary + "22" }]}>
-                  <Text style={[styles.typePillText, { color: type === t.key ? "#fff" : colors.primary }]}>{t.label}</Text>
+                  <Text style={[styles.typePillText, { color: type === t.key ? "#050508" : colors.primary }]}>{t.label}</Text>
                 </Pressable>
               ))}
             </View>
@@ -466,4 +466,468 @@ function AddSessionModal({ visible, onClose }: { visible: boolean; onClose: () =
             </View>
           )}
           <View style={styles.fieldRow}>
-            <View style={[styles.fieldGroup, { flex: 1
+            <View style={[styles.fieldGroup, { flex: 1 }]}>
+              <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>SPM</Text>
+              <TextInput value={spm} onChangeText={setSpm} placeholder="24"
+                placeholderTextColor={colors.mutedForeground} keyboardType="number-pad"
+                style={[styles.modalInput, { color: colors.foreground, backgroundColor: colors.input, borderColor: colors.border, fontFamily: MONO }]} />
+            </View>
+            <View style={[styles.fieldGroup, { flex: 1 }]}>
+              <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>NOTES</Text>
+              <TextInput value={notes} onChangeText={setNotes} placeholder="Optional"
+                placeholderTextColor={colors.mutedForeground}
+                style={[styles.modalInput, { color: colors.foreground, backgroundColor: colors.input, borderColor: colors.border }]} />
+            </View>
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>FEEL</Text>
+            <View style={styles.feelRow}>
+              {([1, 2, 3, 4, 5] as const).map((f) => (
+                <Pressable key={f} onPress={() => setFeel(f)}
+                  style={[styles.feelPill, { backgroundColor: feel === f ? FEEL_COLORS[f] : FEEL_COLORS[f] + "22" }]}>
+                  <Text style={[styles.feelPillText, { color: feel === f ? "#050508" : FEEL_COLORS[f] }]}>{f}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <Pressable onPress={handleAdd}
+            style={({ pressed }) => [styles.addBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 }]}>
+            <Text style={styles.addBtnText}>LOG SESSION</Text>
+          </Pressable>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
+export default function TrainingScreen() {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { ergSessions } = useApp();
+  const { activities, isConnected } = useStrava();
+  const [showModal, setShowModal] = useState(false);
+
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const bottomPad = Platform.OS === "web" ? 34 + 84 : insets.bottom + 84;
+
+  const sortedSessions = [...ergSessions].sort((a, b) => b.date.localeCompare(a.date));
+  const bestTime = ergSessions.length ? Math.min(...ergSessions.filter((s) => s.type === "2k").map((s) => s.time)) : null;
+
+  const stravaRows = isConnected ? activities.filter(isRowingActivity) : [];
+  const stravaOther = isConnected ? activities.filter((a) => !isRowingActivity(a)) : [];
+
+  const programWeek = getProgramWeek();
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: topPad + 16,
+          paddingBottom: bottomPad,
+          paddingHorizontal: 16,
+        }}
+      >
+        <View style={styles.screenHeader}>
+          <View>
+            <Text style={[styles.screenLabel, { color: colors.mutedForeground }]}>TRAINING</Text>
+            <Text style={[styles.screenTitle, { color: colors.foreground }]}>
+              <Text style={{ color: colors.primary, fontFamily: MONO }}>WK {programWeek}</Text>
+              <Text style={{ color: colors.mutedForeground, fontSize: 14 }}> / {PROGRAM_WEEKS}</Text>
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowModal(true);
+            }}
+            style={[styles.fabSmall, { backgroundColor: colors.primary }]}
+          >
+            <Text style={styles.fabSmallText}>+ LOG</Text>
+          </Pressable>
+        </View>
+
+        {bestTime != null && (
+          <View style={[styles.pbBanner, { backgroundColor: colors.accent + "15", borderColor: colors.accent + "44" }]}>
+            <Text style={[styles.pbLabel, { color: colors.accent }]}>PB 2K</Text>
+            <Text style={[styles.pbTime, { color: colors.accent, fontFamily: MONO }]}>{formatErgTime(bestTime)}</Text>
+            {bestTime > TARGET_TIME && (
+              <Text style={[styles.pbGap, { color: colors.mutedForeground, fontFamily: MONO }]}>
+                (-{formatErgTime(bestTime - TARGET_TIME)} to target)
+              </Text>
+            )}
+            {bestTime <= TARGET_TIME && (
+              <Text style={[styles.pbGap, { color: colors.accent }]}>TARGET HIT</Text>
+            )}
+          </View>
+        )}
+
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>2K PROGRESSION</Text>
+        <ProgressionChart sessions={ergSessions} stravaRows={stravaRows} />
+
+        <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>ERG SESSIONS</Text>
+        {sortedSessions.length === 0 ? (
+          <View style={[styles.emptyBox, { borderColor: colors.border }]}>
+            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No sessions logged</Text>
+            <Text style={[styles.emptySubText, { color: colors.mutedForeground }]}>Tap + LOG to record one</Text>
+          </View>
+        ) : (
+          <View style={styles.sessionsList}>
+            {sortedSessions.map((s) => (
+              <SessionCard key={s.id} session={s} isPB={s.type === "2k" && s.time === bestTime} />
+            ))}
+          </View>
+        )}
+
+        {stravaRows.length > 0 && (
+          <>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>STRAVA ROWING</Text>
+            <View style={styles.sessionsList}>
+              {stravaRows.map((a) => (
+                <StravaRowCard key={a.id} activity={a} />
+              ))}
+            </View>
+          </>
+        )}
+
+        {stravaOther.length > 0 && (
+          <>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 16 }]}>STRAVA ACTIVITIES</Text>
+            <View style={styles.sessionsList}>
+              {stravaOther.map((a) => (
+                <StravaActivityCard key={a.id} activity={a} />
+              ))}
+            </View>
+          </>
+        )}
+      </ScrollView>
+
+      <AddSessionModal visible={showModal} onClose={() => setShowModal(false)} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screenHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 20,
+  },
+  screenLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 2,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontFamily: "Inter_700Bold",
+    marginTop: 4,
+  },
+  fabSmall: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  fabSmallText: {
+    color: "#050508",
+    fontFamily: "Inter_700Bold",
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+  pbBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
+  },
+  pbLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 1.5,
+  },
+  pbTime: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  pbGap: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+  },
+  sectionLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 2,
+    marginBottom: 10,
+  },
+  chartLegend: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 8,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendLine: {
+    width: 12,
+    height: 0,
+    borderWidth: 1,
+  },
+  legendText: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+  },
+  sessionsList: {
+    gap: 10,
+  },
+  sessionCard: {
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    overflow: "hidden",
+  },
+  sessionAccent: {
+    width: 4,
+    flexShrink: 0,
+  },
+  sessionBody: {
+    flex: 1,
+    padding: 14,
+    gap: 8,
+  },
+  sessionTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  sessionMeta: {
+    gap: 4,
+  },
+  sessionDate: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+  },
+  sessionBadgeRow: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  typeBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  typeBadgeText: {
+    fontSize: 9,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 1,
+  },
+  sessionTimeBlock: {
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  sessionTime: {
+    fontSize: 22,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+  },
+  sessionSpm: {
+    fontSize: 10,
+    fontFamily: "Inter_400Regular",
+  },
+  splitsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  splitTime: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  splitDivider: {
+    fontSize: 10,
+  },
+  splitLabel: {
+    fontSize: 9,
+    fontFamily: "Inter_400Regular",
+  },
+  sessionBottom: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  feelDot: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  feelDotText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  feelLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+  },
+  sessionNotes: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    flex: 1,
+  },
+  stravaStatRow: {
+    flexDirection: "row",
+    gap: 16,
+    flexWrap: "wrap",
+  },
+  strataStat: {
+    gap: 2,
+  },
+  stravaStatVal: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  stravaStatLabel: {
+    fontSize: 9,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1,
+  },
+  emptyBox: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    padding: 48,
+    alignItems: "center",
+    gap: 8,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
+  },
+  emptySubText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  modalHandle: {
+    alignItems: "center",
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 2,
+  },
+  modalCancel: {
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+    letterSpacing: 1,
+  },
+  modalContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 48,
+    gap: 18,
+  },
+  fieldGroup: {
+    gap: 8,
+  },
+  fieldRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  fieldLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1.5,
+  },
+  modalInput: {
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+  },
+  typeRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  typePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 6,
+  },
+  typePillText: {
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 0.5,
+  },
+  splitsInputRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  splitInput: {
+    flex: 1,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    fontSize: 14,
+    textAlign: "center",
+  },
+  feelRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  feelPill: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  feelPillText: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  addBtn: {
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  addBtnText: {
+    color: "#050508",
+    fontFamily: "Inter_700Bold",
+    fontSize: 13,
+    letterSpacing: 2,
+  },
+});

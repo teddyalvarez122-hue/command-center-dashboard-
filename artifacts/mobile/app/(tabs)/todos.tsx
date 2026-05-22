@@ -23,11 +23,11 @@ const MONO = Platform.select({
 });
 
 const TAG_OPTIONS = [
-  { label: "Work", color: "#4DA6FF" },
-  { label: "Fitness", color: "#FF4500" },
-  { label: "Personal", color: "#00D26A" },
+  { label: "Work", color: "#00F0FF" },
+  { label: "Fitness", color: "#FF2D55" },
+  { label: "Personal", color: "#39FF14" },
   { label: "Learning", color: "#BF5AF2" },
-  { label: "Finance", color: "#FF9F0A" },
+  { label: "Finance", color: "#FFD60A" },
 ];
 
 function formatDate(ts: number) {

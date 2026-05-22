@@ -23,18 +23,18 @@ const MONO = Platform.select({
 });
 
 const PROJECT_COLORS = [
-  "#FF4500",
-  "#00D26A",
-  "#4DA6FF",
+  "#FF2D55",
+  "#39FF14",
+  "#00F0FF",
   "#BF5AF2",
+  "#FFD60A",
   "#FF9F0A",
-  "#FF375F",
 ];
 
 const STATUS_CONFIG = {
-  active: { label: "ACTIVE", color: "#00D26A" },
-  paused: { label: "PAUSED", color: "#FF9F0A" },
-  completed: { label: "DONE", color: "#4DA6FF" },
+  active: { label: "ACTIVE", color: "#39FF14" },
+  paused: { label: "PAUSED", color: "#FFD60A" },
+  completed: { label: "DONE", color: "#00F0FF" },
 };
 
 function ProjectCard({ project }: { project: Project }) {

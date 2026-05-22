@@ -11,13 +11,13 @@
     "splash": {
       "image": "./assets/images/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0A0A0A"
+      "backgroundColor": "#050508"
     },
     "ios": {
       "supportsTablet": false
     },
     "android": {
-      "backgroundColor": "#0A0A0A"
+      "backgroundColor": "#050508"
     },
     "web": {
       "favicon": "./assets/images/icon.png"
